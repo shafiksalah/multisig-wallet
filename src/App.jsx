@@ -3,7 +3,6 @@ import { ethers } from "ethers";
 import { Card, CardContent } from "./components/ui/card";
 import { Button } from "./components/ui/button";
 import { Input } from "./components/ui/input";
-import { Loader, CheckCircle, XCircle } from "lucide-react";
 
 const contractAddress = "YOUR_CONTRACT_ADDRESS";
 const abi = [
@@ -24,9 +23,6 @@ export default function MultiSigWalletUI() {
   const [txAmount, setTxAmount] = useState("");
   const [ownerAddress, setOwnerAddress] = useState("");
   const [owners, setOwners] = useState([]);
-  const [transactions, setTransactions] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState(null);
 
   useEffect(() => {
     if (window.ethereum) {
@@ -37,19 +33,11 @@ export default function MultiSigWalletUI() {
 
   const connectWallet = async () => {
     if (!provider) return;
-    setLoading(true);
-    try {
-      const web3Signer = await provider.getSigner();
-      setSigner(web3Signer);
-      const walletContract = new ethers.Contract(contractAddress, abi, web3Signer);
-      setContract(walletContract);
-      fetchOwners(walletContract);
-      fetchTransactions(walletContract);
-      setMessage({ type: "success", text: "Wallet connected successfully!" });
-    } catch (error) {
-      setMessage({ type: "error", text: "Failed to connect wallet." });
-    }
-    setLoading(false);
+    const web3Signer = await provider.getSigner();
+    setSigner(web3Signer);
+    const walletContract = new ethers.Contract(contractAddress, abi, web3Signer);
+    setContract(walletContract);
+    fetchOwners(walletContract);
   };
 
   const fetchOwners = async (walletContract) => {
@@ -59,81 +47,81 @@ export default function MultiSigWalletUI() {
     }
   };
 
-  const fetchTransactions = async (walletContract) => {
-    if (walletContract) {
-      const txs = [];
-      for (let i = 0; i < 10; i++) {
-        try {
-          const tx = await walletContract.transactions(i);
-          txs.push(tx);
-        } catch (error) {
-          break;
-        }
-      }
-      setTransactions(txs);
+  const submitTransaction = async () => {
+    if (contract) {
+      await contract.submitTransaction(txAddress, ethers.parseEther(txAmount));
+      alert("Transaction submitted");
     }
   };
 
-  const submitTransaction = async () => {
+  const confirmTransaction = async () => {
     if (contract) {
-      setLoading(true);
-      try {
-        await contract.submitTransaction(txAddress, ethers.parseEther(txAmount));
-        setMessage({ type: "success", text: "Transaction submitted successfully!" });
-      } catch (error) {
-        setMessage({ type: "error", text: "Transaction failed." });
-      }
-      setLoading(false);
+      await contract.confirmTransaction(txIndex);
+      alert("Transaction confirmed");
+    }
+  };
+
+  const addOwner = async () => {
+    if (contract) {
+      await contract.addOwner(ownerAddress);
+      alert("Owner added");
+      fetchOwners(contract);
+    }
+  };
+
+  const removeOwner = async () => {
+    if (contract) {
+      await contract.removeOwner(ownerAddress);
+      alert("Owner removed");
+      fetchOwners(contract);
     }
   };
 
   return (
-    <div className="p-4 max-w-lg mx-auto space-y-4">
-      {message && (
-        <div className={`p-2 rounded text-white ${message.type === "success" ? "bg-green-500" : "bg-red-500"}`}>
-          {message.type === "success" ? <CheckCircle className="inline mr-2" /> : <XCircle className="inline mr-2" />} 
-          {message.text}
-        </div>
-      )}
-      <Button onClick={connectWallet} disabled={loading}>
-        {loading ? <Loader className="animate-spin" /> : "Connect Wallet"}
-      </Button>
+    <div className="p-6 bg-gray-100 min-h-screen flex flex-col items-center">
+      <h1 className="text-2xl font-bold text-blue-600 mb-4">MultiSig Wallet</h1>
+      <Button onClick={connectWallet} className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">Connect Wallet</Button>
 
-      <Card className="p-4">
-        <CardContent>
-          <h2 className="text-lg font-bold">Submit Transaction</h2>
-          <Input placeholder="Recipient Address" value={txAddress} onChange={(e) => setTxAddress(e.target.value)} />
-          <Input placeholder="Amount in ETH" value={txAmount} onChange={(e) => setTxAmount(e.target.value)} />
-          <Button onClick={submitTransaction} className="mt-2 bg-blue-500 text-white" disabled={loading}>
-            {loading ? <Loader className="animate-spin" /> : "Submit"}
-          </Button>
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 w-full max-w-2xl">
+        <Card className="shadow-lg p-4 bg-white rounded-lg">
+          <CardContent>
+            <h2 className="text-lg font-bold text-gray-700">Submit Transaction</h2>
+            <Input placeholder="Recipient Address" value={txAddress} onChange={(e) => setTxAddress(e.target.value)} className="mt-2" />
+            <Input placeholder="Amount in ETH" value={txAmount} onChange={(e) => setTxAmount(e.target.value)} className="mt-2" />
+            <Button onClick={submitTransaction} className="mt-4 bg-green-500 hover:bg-green-600 text-white w-full">Submit</Button>
+          </CardContent>
+        </Card>
 
-      <Card className="p-4">
-        <CardContent>
-          <h2 className="text-lg font-bold">Current Owners</h2>
-          <ul>
-            {owners.map((owner, index) => (
-              <li key={index} className="text-sm text-gray-700">{owner}</li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
+        <Card className="shadow-lg p-4 bg-white rounded-lg">
+          <CardContent>
+            <h2 className="text-lg font-bold text-gray-700">Confirm Transaction</h2>
+            <Input placeholder="Transaction Index" value={txIndex} onChange={(e) => setTxIndex(e.target.value)} className="mt-2" />
+            <Button onClick={confirmTransaction} className="mt-4 bg-yellow-500 hover:bg-yellow-600 text-white w-full">Confirm</Button>
+          </CardContent>
+        </Card>
 
-      <Card className="p-4">
-        <CardContent>
-          <h2 className="text-lg font-bold">Recent Transactions</h2>
-          <ul>
-            {transactions.map((tx, index) => (
-              <li key={index} className="text-sm text-gray-700">
-                {tx.to} - {ethers.formatEther(tx.amount)} ETH - {tx.executed ? "Executed" : "Pending"}
-              </li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
+        <Card className="shadow-lg p-4 bg-white rounded-lg">
+          <CardContent>
+            <h2 className="text-lg font-bold text-gray-700">Manage Owners</h2>
+            <Input placeholder="Owner Address" value={ownerAddress} onChange={(e) => setOwnerAddress(e.target.value)} className="mt-2" />
+            <div className="flex gap-2 mt-4">
+              <Button onClick={addOwner} className="bg-green-500 hover:bg-green-600 text-white flex-1">Add Owner</Button>
+              <Button onClick={removeOwner} className="bg-red-500 hover:bg-red-600 text-white flex-1">Remove Owner</Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-lg p-4 bg-white rounded-lg col-span-1 md:col-span-2">
+          <CardContent>
+            <h2 className="text-lg font-bold text-gray-700">Current Owners</h2>
+            <ul className="mt-2 space-y-1">
+              {owners.map((owner, index) => (
+                <li key={index} className="text-sm text-gray-700 bg-gray-200 p-2 rounded">{owner}</li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
-
