@@ -4,7 +4,7 @@ import { Card, CardContent } from "./components/ui/card";
 import { Button } from "./components/ui/button";
 import { Input } from "./components/ui/input";
 
-const contractAddress = "YOUR_CONTRACT_ADDRESS";
+const contractAddress = 0x2fE66F9A7c608096691fA82F3791EDa495471eE3;
 const abi = [
   "function submitTransaction(address _to, uint _amount) public",
   "function confirmTransaction(uint _txIndex) public",
@@ -79,44 +79,43 @@ export default function MultiSigWalletUI() {
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen flex flex-col items-center">
-      <h1 className="text-2xl font-bold text-blue-600 mb-4">MultiSig Wallet</h1>
-      <Button onClick={connectWallet} className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">Connect Wallet</Button>
+      <Button onClick={connectWallet} className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700">Connect Wallet</Button>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 w-full max-w-2xl">
-        <Card className="shadow-lg p-4 bg-white rounded-lg">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 w-full max-w-3xl">
+        <Card className="p-4 bg-white shadow-lg rounded-xl">
           <CardContent>
-            <h2 className="text-lg font-bold text-gray-700">Submit Transaction</h2>
-            <Input placeholder="Recipient Address" value={txAddress} onChange={(e) => setTxAddress(e.target.value)} className="mt-2" />
-            <Input placeholder="Amount in ETH" value={txAmount} onChange={(e) => setTxAmount(e.target.value)} className="mt-2" />
-            <Button onClick={submitTransaction} className="mt-4 bg-green-500 hover:bg-green-600 text-white w-full">Submit</Button>
+            <h2 className="text-xl font-bold text-blue-700">Submit Transaction</h2>
+            <Input className="mt-2 border-gray-300" placeholder="Recipient Address" value={txAddress} onChange={(e) => setTxAddress(e.target.value)} />
+            <Input className="mt-2 border-gray-300" placeholder="Amount in ETH" value={txAmount} onChange={(e) => setTxAmount(e.target.value)} />
+            <Button onClick={submitTransaction} className="mt-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-green-700">Submit</Button>
           </CardContent>
         </Card>
 
-        <Card className="shadow-lg p-4 bg-white rounded-lg">
+        <Card className="p-4 bg-white shadow-lg rounded-xl">
           <CardContent>
-            <h2 className="text-lg font-bold text-gray-700">Confirm Transaction</h2>
-            <Input placeholder="Transaction Index" value={txIndex} onChange={(e) => setTxIndex(e.target.value)} className="mt-2" />
-            <Button onClick={confirmTransaction} className="mt-4 bg-yellow-500 hover:bg-yellow-600 text-white w-full">Confirm</Button>
+            <h2 className="text-xl font-bold text-purple-700">Confirm Transaction</h2>
+            <Input className="mt-2 border-gray-300" placeholder="Transaction Index" value={txIndex} onChange={(e) => setTxIndex(e.target.value)} />
+            <Button onClick={confirmTransaction} className="mt-4 bg-purple-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-purple-700">Confirm</Button>
           </CardContent>
         </Card>
 
-        <Card className="shadow-lg p-4 bg-white rounded-lg">
+        <Card className="p-4 bg-white shadow-lg rounded-xl">
           <CardContent>
-            <h2 className="text-lg font-bold text-gray-700">Manage Owners</h2>
-            <Input placeholder="Owner Address" value={ownerAddress} onChange={(e) => setOwnerAddress(e.target.value)} className="mt-2" />
-            <div className="flex gap-2 mt-4">
-              <Button onClick={addOwner} className="bg-green-500 hover:bg-green-600 text-white flex-1">Add Owner</Button>
-              <Button onClick={removeOwner} className="bg-red-500 hover:bg-red-600 text-white flex-1">Remove Owner</Button>
+            <h2 className="text-xl font-bold text-red-700">Manage Owners</h2>
+            <Input className="mt-2 border-gray-300" placeholder="Owner Address" value={ownerAddress} onChange={(e) => setOwnerAddress(e.target.value)} />
+            <div className="flex gap-4 mt-4">
+              <Button onClick={addOwner} className="bg-green-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-green-700">Add Owner</Button>
+              <Button onClick={removeOwner} className="bg-red-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-red-700">Remove Owner</Button>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="shadow-lg p-4 bg-white rounded-lg col-span-1 md:col-span-2">
+        <Card className="p-4 bg-white shadow-lg rounded-xl">
           <CardContent>
-            <h2 className="text-lg font-bold text-gray-700">Current Owners</h2>
-            <ul className="mt-2 space-y-1">
+            <h2 className="text-xl font-bold text-gray-700">Current Owners</h2>
+            <ul className="mt-2">
               {owners.map((owner, index) => (
-                <li key={index} className="text-sm text-gray-700 bg-gray-200 p-2 rounded">{owner}</li>
+                <li key={index} className="text-sm text-gray-700 border-b py-1">{owner}</li>
               ))}
             </ul>
           </CardContent>
